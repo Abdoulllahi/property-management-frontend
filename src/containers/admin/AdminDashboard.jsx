@@ -55,7 +55,36 @@ const dataProvider = {
       console.error('Error fetching data:', error);
       throw error;
     }
-  },
+    },
+    getOne: async (resource, params) => {
+        const token = localStorage.getItem('adminToken');
+        const { id } = params;
+    
+        try {
+          let url;
+    
+          if (resource === 'customers' || resource === 'owners') {
+            url = `http://localhost:8080/v1/api/users/${id}`;
+          } else if (resource === 'properties') {
+            url = `http://localhost:8080/v1/api/property/${id}`;
+          } else {
+            throw new Error(`Unknown resource: ${resource}`);
+          }
+    
+          const response = await axios.get(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+    
+          return {
+            data: response.data,
+          };
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          throw error;
+        }
+      },
 };
 
 const AdminDashboard = () => {
@@ -83,7 +112,11 @@ const AdminDashboard = () => {
         create={OwnersCreate}
         icon={OwnerIcon}
       />
-      <Resource name="properties" list={PropertiesList} icon={PropertyIcon} />
+          <Resource
+              name="properties"
+              list={PropertiesList}
+              edit={PropertiesEdit}
+              icon={PropertyIcon} />
     </Admin>
   );
 };
@@ -135,6 +168,26 @@ const PropertiesList = (props) => (
     </Datagrid>
   </List>
 );
+
+const PropertiesEdit = (props) => (
+    <Edit {...props}>
+      <SimpleForm>
+      <TextInput source="squareFeetArea" />
+      <TextInput source="detailOverview" />
+      <TextInput source="unitAreaPrice" />
+      <TextInput source="price" />
+      <TextInput source="propertyType" />
+      <TextInput source="homeType" />
+      <TextInput source="numberOfParking" />
+      <TextInput source="views" />
+      <TextInput source="builtDate" />
+      <TextInput source="numberOfBedroom" />
+      <TextInput source="bathroomCount" />
+      <TextInput source="businessType" />
+      <TextInput source="pricePerMonth" />
+      </SimpleForm>
+    </Edit>
+  );
 
 const CustomersEdit = (props) => (
   <Edit {...props}>
