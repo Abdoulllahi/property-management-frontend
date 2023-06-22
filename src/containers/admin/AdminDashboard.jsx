@@ -9,7 +9,8 @@ import {
   Create,
   SimpleForm,
   TextInput,
-  Edit,
+    Edit,
+  useRecordContext,
 } from 'react-admin';
 import { createTheme } from '@material-ui/core/styles';
 import { green, orange, purple } from '@material-ui/core/colors';
@@ -89,11 +90,7 @@ const dataProvider = {
 
 const AdminDashboard = () => {
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      // Token not found, redirect to login page
-      window.location.href = '/admin-login';
-    }
+ localStorage.getItem('adminToken');
   }, []);
 
   return (
@@ -121,6 +118,55 @@ const AdminDashboard = () => {
   );
 };
 
+const ResetPasswordButton = () => {
+    const record = useRecordContext();
+  
+    const handleResetPassword = async () => {
+      if (!record || !record.id) {
+        console.error('Record or record id is undefined');
+        return;
+      }
+  
+      const token = localStorage.getItem('adminToken');
+      const url = `http://localhost:8080/v1/api/admin/users/${record.id}/reset-password`;
+      const newPassword = prompt('Enter a new password:');
+  
+      try {
+        await axios.post(
+          url,
+          { newPassword },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        alert('Password reset successfully!');
+      } catch (error) {
+        console.error('Error resetting password:', error);
+        alert('Failed to reset password.');
+      }
+    };
+  
+    return (
+      <button
+        style={{
+          backgroundColor: 'blue',
+          color: 'white',
+          border: 'none',
+          padding: '8px 12px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          marginLeft: '8px',
+        }}
+        onClick={handleResetPassword}
+      >
+        Reset Password
+      </button>
+    );
+  };
+  
+
 const CustomersList = (props) => (
   <List {...props}>
     <Datagrid>
@@ -128,7 +174,7 @@ const CustomersList = (props) => (
       <TextField source="firstName" />
       <TextField source="lastName" />
       <EditButton />
-      <ResetPasswordButton />
+      <ResetPasswordButton record={props.record}/>
       <DeactivateButton />
     </Datagrid>
   </List>
@@ -141,7 +187,7 @@ const OwnersList = (props) => (
       <TextField source="firstName" />
       <TextField source="lastName" />
       <EditButton />
-      <ResetPasswordButton />
+      <ResetPasswordButton record={props.record}/>
       <DeactivateButton />
     </Datagrid>
   </List>
@@ -240,22 +286,6 @@ const DeactivateButton = () => (
     }}
   >
     Deactivate
-  </button>
-);
-
-const ResetPasswordButton = () => (
-  <button
-    style={{
-      backgroundColor: 'blue',
-      color: 'white',
-      border: 'none',
-      padding: '8px 12px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      marginLeft: '8px',
-    }}
-  >
-    Reset Password
   </button>
 );
 
