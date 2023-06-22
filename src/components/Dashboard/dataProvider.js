@@ -84,69 +84,7 @@ const dataProvider = {
             throw error;
           }
       },
-      deactivateOne: async (resource, params) => {
-          const { id } = params;
-          const token = localStorage.getItem('adminToken');
       
-          try {
-            let url;
-      
-            if (resource === 'customers' || resource === 'owners') {
-              url = `http://localhost:8080/v1/api/admin/users/${id}/deactivate`;
-            } else {
-              throw new Error(`Unknown resource: ${resource}`);
-            }
-      
-            await axios.put(
-              url,
-              {},
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-      
-            return {
-              data: { id },
-            };
-          } catch (error) {
-            console.error('Error deactivating user:', error);
-            throw error;
-          }
-        },
-      
-        activateOne: async (resource, params) => {
-          const { id } = params;
-          const token = localStorage.getItem('adminToken');
-      
-          try {
-            let url;
-      
-            if (resource === 'customers' || resource === 'owners') {
-              url = `http://localhost:8080/v1/api/admin/users/${id}/activate`;
-            } else {
-              throw new Error(`Unknown resource: ${resource}`);
-            }
-      
-            await axios.put(
-              url,
-              {},
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-      
-            return {
-              data: { id },
-            };
-          } catch (error) {
-            console.error('Error activating user:', error);
-            throw error;
-          }
-        },
-};
+        };
   
 export default dataProvider;

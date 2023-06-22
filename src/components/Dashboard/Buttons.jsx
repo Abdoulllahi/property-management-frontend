@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useRecordContext } from 'react-admin';
-import dataProvider from './dataProvider';
 
 const ResetPasswordButton = () => {
     const record = useRecordContext();
@@ -36,7 +35,7 @@ const ResetPasswordButton = () => {
     return (
       <button
         style={{
-          backgroundColor: 'blue',
+          backgroundColor: 'purple',
           color: 'white',
           border: 'none',
           padding: '8px 12px',
@@ -50,9 +49,9 @@ const ResetPasswordButton = () => {
       </button>
     );
 };
-
-const DeactivateButton = ({ resource }) => {
+const DeactivateButton = () => {
     const record = useRecordContext();
+    const [isDeactivated, setIsDeactivated] = useState(false);
   
     const handleDeactivate = async () => {
       if (!record || !record.id) {
@@ -60,21 +59,41 @@ const DeactivateButton = ({ resource }) => {
         return;
       }
   
-      const confirmDeactivate = window.confirm('Are you sure you want to deactivate this user?');
-      if (!confirmDeactivate) return;
+      const confirmAction = isDeactivated
+        ? 'Are you sure you want to activate this user?'
+        : 'Are you sure you want to deactivate this user?';
+  
+      const confirmActionVerb = isDeactivated ? 'activate' : 'deactivate';
+  
+      const confirmed = window.confirm(confirmAction);
+      if (!confirmed) return;
+  
+      const token = localStorage.getItem('adminToken');
+      const url = `http://localhost:8080/v1/api/admin/users/${record.id}/reset-password`;
   
       try {
-        const response = await dataProvider.deactivateOne(resource, { id: record.id });
-        console.log('User deactivated:', response.data);
+        const newPassword = isDeactivated ? 'WELCOME' : 'GO AWAY';
+        await axios.post(
+          url,
+          { newPassword },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setIsDeactivated(!isDeactivated);
+        console.log(`User ${confirmActionVerb}d successfully!`);
+        alert(`User ${confirmActionVerb}d successfully!`);
       } catch (error) {
-        console.error('Error deactivating user:', error);
+        console.error(`Error ${confirmActionVerb}ing user:`, error);
       }
     };
   
     return (
       <button
         style={{
-          backgroundColor: 'red',
+          backgroundColor: isDeactivated ? 'green' : 'red',
           color: 'white',
           border: 'none',
           padding: '8px 12px',
@@ -83,12 +102,9 @@ const DeactivateButton = ({ resource }) => {
         }}
         onClick={handleDeactivate}
       >
-        Deactivate
+        {isDeactivated ? 'Activate' : 'Deactivate'}
       </button>
     );
-};
-  
-export {
-    ResetPasswordButton,
-    DeactivateButton,
   };
+    
+export  { DeactivateButton, ResetPasswordButton };
