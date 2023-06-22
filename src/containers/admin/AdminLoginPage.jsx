@@ -1,45 +1,38 @@
 import React, { useState } from 'react';
-import '../../assets/css/Admin-login.css'
-// import houseBackground from '../../assets/images/r-architecture-2gDwlIim3Uw-unsplash.jpg';
-
+import axios from 'axios';
+import '../../assets/css/Admin-login.css';
 
 const AdminLoginPage = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
-    // try {
-    //     const response = await fetch('http://localhost:8080/api/v1/login', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       body: JSON.stringify({
-    //         username,
-    //         password,
-    //       }),
-    //     });
   
-    //     if (response.ok) {
-    //       const data = await response.json();
-    //       const token = data.token;
-    //       localStorage.setItem('token', token);
-    //       onLogin(true);
-    //     } else {
-    //       throw new Error('Invalid username or password');
-    //     }
-    //   } catch (error) {
-    //     console.error(error);
-    //     alert('Error during login. Please try again.');
-    //   }
-    if (username === 'admin' && password === 'password') {
-      onLogin(true);
-    } else {
-      alert('Invalid username or password');
+    try {
+      const response = await axios.post('http://localhost:8080/v1/api/auth/login', {
+        email,
+        password,
+      });
+  
+      if (response.status === 200) {
+        const token = response.data.accessToken;
+  
+        // Store token in local storage
+        localStorage.setItem('adminToken', token);
+        console.log('Token:', token); // Add this line to check the token value
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        onLogin(true);
+      } else {
+        // Login failed
+        alert(response.data.message || 'Invalid username or password');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('An error occurred during login');
     }
   };
+  
 
   return (
     <div className="wrapper">
@@ -60,10 +53,10 @@ const AdminLoginPage = ({ onLogin }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder="Username or Email"
+                  placeholder="Email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </p>
               <p>
@@ -82,7 +75,7 @@ const AdminLoginPage = ({ onLogin }) => {
                 <input type="submit" value="Sign In" />
               </p>
               <p>
-                <a href="">Forget Password?</a>
+                <a href="">Forgot Password?</a>
               </p>
             </form>
           </div>
